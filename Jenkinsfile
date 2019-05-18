@@ -1,4 +1,4 @@
-@Library('shared-jenkins-library') _
+@Library('shared-jenkins-library@master') _
 
 stage ("custom deployment") {
   echo "here"
