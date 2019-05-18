@@ -1,6 +1,3 @@
-@Library('shared-jenkins-library@master') _
+@Library('shared-jenkins-library') _
 
-Script {}
-// stage ("custom deployment") {
-//   echo "here"
-// }
+Pipeline {}
