@@ -1,1 +1,1 @@
-docker build --tag nodejs-docker-webapp .
+docker build --tag ${image} .
