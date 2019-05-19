@@ -22,7 +22,7 @@ spec:
       containers:
         - image: gcr.io/unity-ads-workshop-test/rasmus-nodejs-docker-webapp:latest
           name: rasmus-nodejs-docker-webapp
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           resources:
             requests:
               cpu: 0.1
