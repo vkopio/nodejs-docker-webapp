@@ -14,25 +14,18 @@ jobs:
             echo "CIRCLE_PROJECT_USERNAME=$CIRCLE_PROJECT_USERNAME"
             echo "CIRCLE_REPOSITORY_URL=$CIRCLE_REPOSITORY_URL"
             echo "CIRCLE_USERNAME=$CIRCLE_USERNAME"
-
-            echo 'export SERVICE='${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} >> $BASH_ENV
-            echo 'export IMAGE='${SERVICE}:${CIRCLE_SHA1} >> $BASH_ENV
-
-            echo "SERVICE=$SERVICE"
-            echo "IMAGE=$IMAGE"
+            echo "CIRCLE_SHA1=$CIRCLE_SHA1"
 
       # build the application image
-      # - run: docker build -t ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} .
+      - run: docker build -t gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} .
 
       # authenticate and push image
-      # - run:
-      #     command: |
-      #       set -x
-      #       gcloud auth activate-service-account \${GKE_SERVICE_ACCOUNT_USER} --key-file=\${GKE_SERVICE_ACCOUNT} >/dev/null 2>&1
-      #       docker login -u _json_key -p "\$(cat ${GKE_SERVICE_ACCOUNT})" https://gcr.io >/dev/null 2>&1
-      #       docker push ${image}
-      #       docker tag ${image} gcr.io/unity-ads-workshop-test/${service}:latest
-      #       docker push gcr.io/unity-ads-workshop-test/${service}:latest
-
-      # push image
-      # - run: docker push ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
+      - run:
+          command: |
+            set -x
+            echo ${WORKSHOP_CI_ACCOUNT_TOKEN_BASE64} > .WORKSHOP_CI_ACCOUNT_TOKEN.json
+            gcloud auth activate-service-account ${WORKSHOP_CI_USER} --key-file=.WORKSHOP_CI_ACCOUNT_TOKEN.json >/dev/null 2>&1
+            gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io >/dev/null 2>&1
+            docker push ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
+            docker tag ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest
+            docker push gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:latest
