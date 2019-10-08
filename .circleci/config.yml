@@ -22,8 +22,7 @@ jobs:
       # authenticate and push image
       - run:
           command: |
-            set -x
-            echo ${WORKSHOP_CI_ACCOUNT_TOKEN_BASE64} > .WORKSHOP_CI_ACCOUNT_TOKEN.json
+            echo ${WORKSHOP_CI_ACCOUNT_TOKEN_BASE64} | base64 --decode > .WORKSHOP_CI_ACCOUNT_TOKEN.json
             gcloud auth activate-service-account ${WORKSHOP_CI_USER} --key-file=.WORKSHOP_CI_ACCOUNT_TOKEN.json >/dev/null 2>&1
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io >/dev/null 2>&1
             docker push ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
