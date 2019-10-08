@@ -1,12 +1,38 @@
 version: 2
 jobs:
- build:
-   machine: true
-   steps:
-     - checkout
+  build:
+    machine: true
+    steps:
+      - checkout
 
-     # build the application image
-     - run: docker build -t rasmus-unity/nodejs-docker-webapp:$CIRCLE_BRANCH .
+      # setup variables
+      - run:
+          command: |
+            echo "CIRCLE_BRANCH=$CIRCLE_BRANCH"
+            echo "CIRCLE_JOB=$CIRCLE_JOB"
+            echo "CIRCLE_PROJECT_REPONAME=$CIRCLE_PROJECT_REPONAME"
+            echo "CIRCLE_PROJECT_USERNAME=$CIRCLE_PROJECT_USERNAME"
+            echo "CIRCLE_REPOSITORY_URL=$CIRCLE_REPOSITORY_URL"
+            echo "CIRCLE_USERNAME=$CIRCLE_USERNAME"
 
-     # deploy the image
-     #  - run: docker push company/app:$CIRCLE_BRANCH
+            echo 'export SERVICE='${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} >> $BASH_ENV
+            echo 'export IMAGE='${SERVICE}:${CIRCLE_SHA1} >> $BASH_ENV
+
+            echo "SERVICE=$SERVICE"
+            echo "IMAGE=$IMAGE"
+
+      # build the application image
+      # - run: docker build -t ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} .
+
+      # authenticate and push image
+      # - run:
+      #     command: |
+      #       set -x
+      #       gcloud auth activate-service-account \${GKE_SERVICE_ACCOUNT_USER} --key-file=\${GKE_SERVICE_ACCOUNT} >/dev/null 2>&1
+      #       docker login -u _json_key -p "\$(cat ${GKE_SERVICE_ACCOUNT})" https://gcr.io >/dev/null 2>&1
+      #       docker push ${image}
+      #       docker tag ${image} gcr.io/unity-ads-workshop-test/${service}:latest
+      #       docker push gcr.io/unity-ads-workshop-test/${service}:latest
+
+      # push image
+      # - run: docker push ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
