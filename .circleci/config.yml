@@ -25,6 +25,6 @@ jobs:
             echo ${WORKSHOP_CI_ACCOUNT_TOKEN_BASE64} | base64 --decode > .WORKSHOP_CI_ACCOUNT_TOKEN.json
             gcloud auth activate-service-account ${WORKSHOP_CI_USER} --key-file=.WORKSHOP_CI_ACCOUNT_TOKEN.json >/dev/null 2>&1
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io >/dev/null 2>&1
-            docker push ${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
+            docker push gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
             docker tag ${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:latest
             docker push gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:latest
