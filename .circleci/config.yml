@@ -34,3 +34,12 @@ jobs:
             echo Tagging and pushing gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:latest...
             docker tag gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:latest
             docker push gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:latest
+
+      # deploy to GKE
+      - run:
+          command: |
+            kubectl --help
+            # docker run --rm --volume `pwd`:/service gcr.io/unity-ads-workshop-test/workshop-deployer bash -c 'if kubectl get service ${service}-lb -n workshop > /dev/null; then kubectl delete service ${service}-lb -n workshop; fi'
+            # docker run --rm --volume `pwd`:/service gcr.io/unity-ads-workshop-test/workshop-deployer bash -c 'kubectl apply -f /service/manifests/service.yaml -f /service/manifests/deployment.yaml'
+            # docker run --rm --volume `pwd`:/service gcr.io/unity-ads-workshop-test/workshop-deployer bash -c 'kubectl expose deployment -n workshop ${service} --type=LoadBalancer --name=${service}-lb --port=8080'
+            # docker run --rm --volume `pwd`:/service gcr.io/unity-ads-workshop-test/workshop-deployer bash -c 'kubectl get all -n workshop | grep ${service}'
