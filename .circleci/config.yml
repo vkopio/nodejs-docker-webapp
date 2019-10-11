@@ -6,6 +6,7 @@ orbs:
 
 jobs:
   build:
+    description: Build and push service docker image
     machine: true
     steps:
       # Install `gcloud`
@@ -35,11 +36,12 @@ jobs:
 
             docker build -t ${image}:${CIRCLE_SHA1} .
             docker push ${image}:${CIRCLE_SHA1}
-            docker tag ${image}:${CIRCLE_SHA1} ${image}:latest
-            docker push ${image}:latest
+
+            docker tag ${image}:${CIRCLE_SHA1} ${image}:master
+            docker push ${image}:master
 
   deploy:
-    description: Deploy application to Google Kubernetes Engine
+    description: Deploy service to Google Kubernetes Engine
     machine: true
     steps:
       # Install `gcloud` and `kubectl`
@@ -56,7 +58,7 @@ jobs:
             gcloud container clusters get-credentials ${WORKSHOP_CLUSTER} --zone ${WORKSHOP_CLUSTER_ZONE} --project ${WORKSHOP_GCP_PROJECT}
             kubectl config current-context
 
-            service=${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}
+            service=rasmus-nodejs-docker-webapp
             namespace=workshop
 
             if kubectl get service ${service}-lb -n ${namespace} > /dev/null; then
