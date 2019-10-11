@@ -50,6 +50,7 @@ jobs:
 
       - run:
           command: |
+            gcloud container clusters get-credentials ${WORKSHOP_CLUSTER} --zone ${WORKSHOP_CLUSTER_ZONE} --project ${WORKSHOP_GCP_PROJECT}
             kubectl config current-context
 
 workflows:
