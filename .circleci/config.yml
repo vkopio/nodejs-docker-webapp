@@ -51,6 +51,7 @@ jobs:
       - run:
           command: |
             echo gcloud auth...
+            echo ${WORKSHOP_CI_ACCOUNT_TOKEN_BASE64} | base64 --decode > .WORKSHOP_CI_ACCOUNT_TOKEN.json
             gcloud auth activate-service-account ${WORKSHOP_CI_USER} --key-file=.WORKSHOP_CI_ACCOUNT_TOKEN.json >/dev/null 2>&1
 
             set -x
