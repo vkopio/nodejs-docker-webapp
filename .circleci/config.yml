@@ -37,8 +37,10 @@ jobs:
             docker build -t ${image}:${CIRCLE_SHA1} .
             docker push ${image}:${CIRCLE_SHA1}
 
-            docker tag ${image}:${CIRCLE_SHA1} ${image}:master
-            docker push ${image}:master
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              docker tag ${image}:${CIRCLE_SHA1} ${image}:master
+              docker push ${image}:master
+            fi
 
   deploy:
     description: Deploy service to Google Kubernetes Engine
@@ -73,5 +75,9 @@ workflows:
     jobs:
       - build
       - deploy:
+          filters:
+            branches:
+              only:
+                - master
           requires:
             - build
