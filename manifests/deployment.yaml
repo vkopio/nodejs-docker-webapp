@@ -35,4 +35,4 @@ spec:
               value: some env value
 
       nodeSelector:
-        service: workshop
+        cloud.google.com/gke-nodepool: workshop-pool
