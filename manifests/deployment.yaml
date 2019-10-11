@@ -20,7 +20,7 @@ spec:
       annotations:
     spec:
       containers:
-        - image: gcr.io/unity-ads-workshop-test/rasmus-nodejs-docker-webapp:latest
+        - image: gcr.io/unity-ads-workshop-test/rasmus-nodejs-docker-webapp:master
           name: rasmus-nodejs-docker-webapp
           imagePullPolicy: Always
           resources:
@@ -35,4 +35,4 @@ spec:
               value: some env value
 
       nodeSelector:
-        service: workshop
+        cloud.google.com/gke-nodepool: workshop-pool
