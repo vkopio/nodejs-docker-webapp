@@ -28,16 +28,13 @@ jobs:
       # authenticate and push image
       - run:
           command: |
-            echo ${WORKSHOP_CI_ACCOUNT_TOKEN_BASE64} | base64 --decode > .WORKSHOP_CI_ACCOUNT_TOKEN.json
-
             echo Authenticating...
+            echo ${WORKSHOP_CI_ACCOUNT_TOKEN_BASE64} | base64 --decode > .WORKSHOP_CI_ACCOUNT_TOKEN.json
             gcloud auth activate-service-account ${WORKSHOP_CI_USER} --key-file=.WORKSHOP_CI_ACCOUNT_TOKEN.json >/dev/null 2>&1
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io >/dev/null 2>&1
 
-            echo Pushing gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}...
+            set -x
             docker push gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
-
-            echo Tagging and pushing gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:latest...
             docker tag gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:latest
             docker push gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:latest
 
@@ -50,7 +47,7 @@ jobs:
 
       - run:
           command: |
-            echo gcloud auth...
+            echo Authenticating...
             echo ${WORKSHOP_CI_ACCOUNT_TOKEN_BASE64} | base64 --decode > .WORKSHOP_CI_ACCOUNT_TOKEN.json
             gcloud auth activate-service-account ${WORKSHOP_CI_USER} --key-file=.WORKSHOP_CI_ACCOUNT_TOKEN.json >/dev/null 2>&1
 
@@ -58,8 +55,19 @@ jobs:
             gcloud container clusters get-credentials ${WORKSHOP_CLUSTER} --zone ${WORKSHOP_CLUSTER_ZONE} --project ${WORKSHOP_GCP_PROJECT}
             kubectl config current-context
 
+            service=${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}
+            namespace=default
+            if kubectl get service ${service}-lb -n ${namespace} > /dev/null; then
+              kubectl delete service ${service}-lb -n ${namespace};
+            fi
+            kubectl apply -f manifests/service.yaml -f manifests/deployment.yaml
+            kubectl expose deployment -n ${namespace} ${service} --type=LoadBalancer --name=${service}-lb --port=8080
+            kubectl get all -n ${namespace} | grep ${service}
+
 workflows:
   build_update_deploy:
     jobs:
       - build
-      - deploy
+      - deploy:
+          requires:
+            - build
