@@ -1,6 +1,7 @@
 version: 2.1
 
 orbs:
+  gcp-cli: circleci/gcp-cli@1.8.2
   gcp-gke: circleci/gcp-gke@0.2.0
 
 jobs:
@@ -8,8 +9,9 @@ jobs:
     machine: true
     steps:
       - checkout
+      - gcp-cli/install
 
-      # setup variables
+      # output variables for visibility
       - run:
           command: |
             echo "CIRCLE_BRANCH=$CIRCLE_BRANCH"
@@ -39,11 +41,19 @@ jobs:
             docker tag gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:latest
             docker push gcr.io/unity-ads-workshop-test/${CIRCLE_PROJECT_USERNAME}-${CIRCLE_PROJECT_REPONAME}:latest
 
-      # deploy to GKE
+  deploy:
+    description: Deploy application to Google Kubernetes Engine
+    machine: true
+    steps:
+      # Install `gcloud` and `kubectl` if not already installed.
+      - gcp-gke/install
+
       - run:
           command: |
-            kubectl --help
-            # docker run --rm --volume `pwd`:/service gcr.io/unity-ads-workshop-test/workshop-deployer bash -c 'if kubectl get service ${service}-lb -n workshop > /dev/null; then kubectl delete service ${service}-lb -n workshop; fi'
-            # docker run --rm --volume `pwd`:/service gcr.io/unity-ads-workshop-test/workshop-deployer bash -c 'kubectl apply -f /service/manifests/service.yaml -f /service/manifests/deployment.yaml'
-            # docker run --rm --volume `pwd`:/service gcr.io/unity-ads-workshop-test/workshop-deployer bash -c 'kubectl expose deployment -n workshop ${service} --type=LoadBalancer --name=${service}-lb --port=8080'
-            # docker run --rm --volume `pwd`:/service gcr.io/unity-ads-workshop-test/workshop-deployer bash -c 'kubectl get all -n workshop | grep ${service}'
+            kubectl config current-context
+
+workflows:
+  build_update_deploy:
+    jobs:
+      - build
+      - deploy
