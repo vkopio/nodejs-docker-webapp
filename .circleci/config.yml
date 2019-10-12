@@ -68,8 +68,6 @@ jobs:
               kubectl delete service ${service}-lb -n ${namespace};
             fi
 
-            mkdir manifests/generated
-
             for f in manifests/*.yaml
             do
               envsubst < $f > “./manifests/generated/$(basename $f)”
