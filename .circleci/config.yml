@@ -70,7 +70,8 @@ jobs:
 
             mkdir manifests/generated
 
-            for f in manifests/*.yaml do
+            for f in manifests/*.yaml
+            do
               envsubst < $f > “./manifests/generated/$(basename $f)”
             done
 
