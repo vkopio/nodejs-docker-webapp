@@ -24,11 +24,14 @@ jobs:
             echo "CIRCLE_USERNAME=$CIRCLE_USERNAME"
             echo "CIRCLE_SHA1=$CIRCLE_SHA1"
 
-      - run:
+      - run: &authenticate
           command: |
             echo Authenticating...
             echo ${WORKSHOP_CI_ACCOUNT_TOKEN_BASE64} | base64 --decode > .WORKSHOP_CI_ACCOUNT_TOKEN.json
             gcloud auth activate-service-account ${WORKSHOP_CI_USER} --key-file=.WORKSHOP_CI_ACCOUNT_TOKEN.json >/dev/null 2>&1
+
+      - run:
+          command: |
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io >/dev/null 2>&1
 
             set -x
@@ -50,12 +53,10 @@ jobs:
       - gcp-gke/install
       - checkout
 
+      - run: *authenticate
+
       - run:
           command: |
-            echo Authenticating...
-            echo ${WORKSHOP_CI_ACCOUNT_TOKEN_BASE64} | base64 --decode > .WORKSHOP_CI_ACCOUNT_TOKEN.json
-            gcloud auth activate-service-account ${WORKSHOP_CI_USER} --key-file=.WORKSHOP_CI_ACCOUNT_TOKEN.json >/dev/null 2>&1
-
             set -x
             gcloud container clusters get-credentials ${WORKSHOP_CLUSTER} --zone ${WORKSHOP_CLUSTER_ZONE} --project ${WORKSHOP_GCP_PROJECT}
             kubectl config current-context
@@ -66,7 +67,8 @@ jobs:
             if kubectl get service ${service}-lb -n ${namespace} > /dev/null; then
               kubectl delete service ${service}-lb -n ${namespace};
             fi
-            kubectl apply -f ./manifests/service.yaml -f ./manifests/deployment.yaml
+
+            kubectl apply -f ./manifests
             kubectl expose deployment -n ${namespace} ${service} --type=LoadBalancer --name=${service}-lb --port=8080
             kubectl get all -n ${namespace} | grep ${service}
             kubectl describe -n ${namespace} service/${service}-lb || true
