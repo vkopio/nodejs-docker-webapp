@@ -68,7 +68,13 @@ jobs:
               kubectl delete service ${service}-lb -n ${namespace};
             fi
 
-            kubectl apply -f ./manifests
+            mkdir manifests/generated
+
+            for f in manifests/*.yaml do
+              envsubst < $f > “./manifests/generated/$(basename $f)”
+            done
+
+            kubectl apply -f ./manifests/generated
             kubectl expose deployment -n ${namespace} ${service} --type=LoadBalancer --name=${service}-lb --port=8080
             kubectl get all -n ${namespace} | grep ${service}
             kubectl describe -n ${namespace} service/${service}-lb || true

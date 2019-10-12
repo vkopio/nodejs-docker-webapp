@@ -20,7 +20,7 @@ spec:
       annotations:
     spec:
       containers:
-        - image: gcr.io/unity-ads-workshop-test/vkopio-nodejs-docker-webapp:master
+        - image: gcr.io/unity-ads-workshop-test/vkopio-nodejs-docker-webapp:${CIRCLE_SHA1}
           name: vkopio-nodejs-docker-webapp
           imagePullPolicy: Always
           resources:
