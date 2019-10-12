@@ -70,7 +70,8 @@ jobs:
 
             for f in manifests/*.yaml
             do
-              envsubst < $f > “./manifests/generated/$(basename $f)”
+              echo “manifests/generated/$(basename $f)”
+              envsubst < $f > “manifests/generated/$(basename $f)”
             done
 
             kubectl apply -f ./manifests/generated
